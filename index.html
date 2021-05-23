@@ -24,6 +24,9 @@
       .mono {
         font-family: monospace;
       }
+      .toc {
+        font-size: xx-large;
+      }
     </style>
   </head>
   <body>
@@ -43,11 +46,13 @@ class: center, middle
 
 # Anular
 
+.toc[
 - Qué es una URL
 - Qué es una URI
 - @PathVarible vs @RequestParam vs @RequestBody
 - REST y Richardson Maturity Model
 - REST y Angular
+]
 
 ---
 
@@ -79,6 +84,13 @@ https://developer.mozilla.org/en-US/docs/Learn/Common_questions/What_is_a_URL
 
 # URLs Semáticas
 
+Simplemente se trata de ocultar detalles técnicos en la URL:
+
+1. Identificadores
+2. Extensiones
+3. Formatos
+4. Configuraciones
+
 | Original URL | Clean URL |
 |--------------|-----------|
 |http://example.com/about.html|http://example.com/about|
@@ -90,6 +102,8 @@ https://developer.mozilla.org/en-US/docs/Learn/Common_questions/What_is_a_URL
 ---
 
 # Qué es una URI
+
+Una URI es una **superclase** de una URL. Una URL es un **caso particular** de una URI.
 
 https://en.wikipedia.org/wiki/Uniform_Resource_Identifier
 
@@ -106,11 +120,15 @@ En contraste, un **URN** no indica cómo obtener el _Resource_.
 
 # URLs & Resources
 
-## Collections
+Una URL dice dónde está (**Location**) un recurso (**Resource**).
+
+## Tipos de Resource
+
+- Collections
 
 https://localhost:8080/colegiados
 
-## Single Resource
+-  Single Resource
 
 https://localhost:8080/colegiados/1103
 
@@ -118,7 +136,9 @@ https://localhost:8080/colegiados/1103
 
 # Criterios de Diseño de URLs
 
-## 1. Uniformidad
+## Uniformidad
+
+> "Que exista el mismo patrón de **Location** para todos los **Resources**"
 
 https://localhost:8080/colegiados
 
@@ -132,6 +152,14 @@ https://localhost:8080/colegiados/1103/guardar
 
 https://localhost:8080/colegiados/1103/borrar
 
+---
+
+# **/path** y **?params** en Spring @Controller's
+
+En Spring `@Controller` y `@RestController` existen 2 anotaciones distintas:
+
+1. **`@PathVariable("parte")`**: para obtener `/{parte}/{del}/{path}`
+2. **`@RequestParam("param")`**: para obtener `?param=`
 ---
 
 # @PathVariable
@@ -312,6 +340,45 @@ https://www.infoq.com/presentations/rest-misconceptions/
 ![:scale 600px](imgs/infoq-stefan-tilkov-rest-and-urls.png)
 
 ![:scale 400px](imgs/infoq-stefan-tilkov-no-restful-uris.png)
+
+---
+
+# REST Richardson Maturity Model
+
+> - Level 1: break down an endpoint into multiple **Resources**.
+> - Level 2: use **Verbs** for operations on the same **resource** URI
+> - Level 3: provide **discoverability** on **Resource** operations
+
+![:scale 600px](imgs/rest-maturity-model.png)
+
+
+---
+
+# REST: Level 0
+
+![:scale 600px](imgs/level0.png)
+
+---
+
+# REST: Level 1
+
+![:scale 600px](imgs/level1.png)
+
+---
+
+# REST: Level 2
+
+![:scale 600px](imgs/level2.png)
+
+---
+
+# REST: Level 3
+
+![:scale 600px](imgs/level3.png)
+
+---
+
+![:scale 400px](imgs/rest-levels-meme.jpg)
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
