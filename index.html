@@ -51,7 +51,6 @@ class: center, middle
 - Qué es una URI
 - @PathVarible vs @RequestParam vs @RequestBody
 - REST y Richardson Maturity Model
-- REST y Angular
 ]
 
 ---
@@ -100,7 +99,6 @@ Simplemente se trata de ocultar detalles técnicos en la URL:
 |http://en.wikipedia.org/w/index.php?title=Clean_URL|http://en.wikipedia.org/wiki/Clean_URL|
 
 ---
-
 # Qué es una URI
 
 Una URI es una **superclase** de una URL. Una URL es un **caso particular** de una URI.
@@ -117,7 +115,34 @@ En contraste, un **URN** no indica cómo obtener el _Resource_.
 ![:scale 400px](imgs/ejemplo-de-urn.png)
 
 ---
+# URI Templates: RFC 6570
 
+https://datatracker.ietf.org/doc/html/rfc6570
+
+Java: https://github.com/hal4j/uritemplate
+
+```java
+String uri = "http://www.example.com{?p1,p2,p3*}";
+String expected = "http://www.example.com?p2=v2&p2=v3{&p1,p3*}";
+
+Map<String, Object> map = new HashMap<>();
+map.put("p2", asList("v2", "v3"));
+
+String result = URITemplateParser.parseAndExpand(uri, map);
+```
+
+JavaScript: https://www.npmjs.com/package/urijs
+
+```js
+// URI Templates
+URI.expand("/foo/{dir}/{file}", {
+  dir: "bar",
+  file: "world.html"
+});
+// -> /foo/bar/world.html
+```
+
+---
 # URLs & Resources
 
 Una URL dice dónde está (**Location**) un recurso (**Resource**).
@@ -345,6 +370,8 @@ https://www.infoq.com/presentations/rest-misconceptions/
 
 # REST Richardson Maturity Model
 
+https://martinfowler.com/articles/richardsonMaturityModel.html
+
 > - Level 1: break down an endpoint into multiple **Resources**.
 > - Level 2: use **Verbs** for operations on the same **resource** URI
 > - Level 3: provide **discoverability** on **Resource** operations
@@ -356,30 +383,190 @@ https://www.infoq.com/presentations/rest-misconceptions/
 
 # REST: Level 0
 
-![:scale 600px](imgs/level0.png)
+`GET /appointmentService?op=openSlotRequest&date=2010-01-04&doctor=mjones`
+```json
+{
+  openSlotList: [
+    {
+      start: "14:00",
+      end: "14:15",
+      doctor: "mjones"
+    }
+  ]
+}
+```
+`GET /appointmentService?op=appointmentRequest&start=14:00&end=14:15&doctor=mjones&patient=jsmith`
+```json
+{
+  start: "14:00",
+  end: "14:15",
+  doctor: "mjones"
+  patient: "jsmith"
+}
+```
+---
+# REST: Level 0
+
+![:scale 700px](imgs/level0.png)
 
 ---
+# REST: Level 1 - Resources
 
-# REST: Level 1
+`GET /doctors/mjones?date=2010-01-04`
+```json
+{
+  openSlotList: [
+    {
+      id: "1",
+      start: "14:00",
+      end: "14:15",
+      doctor: "mjones"
+    }
+  ]
+}
+```
+`GET /slots/1?patient=jsmith`
+```json
+{
+  id: 1,
+  start: "14:00",
+  end: "14:15",
+  doctor: "mjones"
+  patient: "jsmith"
+}
+```
+---
+# REST: Level 1 - Resources
 
-![:scale 600px](imgs/level1.png)
+![:scale 700px](imgs/level1.png)
 
 ---
+# REST: Level 2 - HTTP Verbs && Status
 
-# REST: Level 2
-
-![:scale 600px](imgs/level2.png)
+`GET /doctors/mjones/slots?date=2010-01-04&status=open`
+```json
+{
+  openSlotList: [
+    {
+      id: "1",
+      start: "14:00",
+      end: "14:15",
+      doctor: "mjones"
+    }
+  ]
+}
+```
 
 ---
+# REST: Level 2 - HTTP Verbs && Status
 
-# REST: Level 3
+`POST /slots/1`
+```json
+{
+  patient: "jsmith"
+}
+```
+-
+```
+HTTP/1.1 201 Created
+Location: /slots/1/appointment
+```
+```json
+{
+  id: 1,
+  start: "14:00",
+  end: "14:15",
+  doctor: "mjones"
+  patient: "jsmith"
+}
+```
+-
+```
+HTTP/1.1 409 Conflict
+```
+
+---
+# REST: Level 2 - HTTP Verbs && Status
+
+![:scale 700px](imgs/level2.png)
+
+---
+# REST: Level 3 - Hypermedia
+
+`GET /doctors/mjones/slots?date=2010-01-04&status=open`
+```json
+{
+  openSlotList: [
+    {
+      id: "1",
+      start: "14:00",
+      end: "14:15",
+      doctor: "mjones",
+      link: {
+        rel: "/linkrels/slot/book",
+        uri: "/slots/1"
+      }
+    }
+  ]
+}
+```
+---
+# REST: Level 3 - Hypermedia
+
+`POST /slots/1`
+```json
+{
+  patient: "jsmith"
+}
+```
+```
+HTTP/1.1 201 Created
+Location: /slots/1/appointment
+```
+```json
+{
+  id: 1,
+  start: "14:00",
+  end: "14:15",
+  doctor: "mjones",
+  patient: "jsmith",
+  links: [
+  {
+    rel: "/linkrels/appointment/cancel",
+    uri: "/slots/1/appointment" // DELETE
+  },
+  {
+    rel: "/linkrels/appointment/changeTime",
+    uri: "/doctors/mjones/slots?date=20100104&status=open" 
+  }
+  ]
+}
+```
+---
+# REST: Level 3 - Hypermedia
 
 ![:scale 600px](imgs/level3.png)
 
 ---
 
-![:scale 400px](imgs/rest-levels-meme.jpg)
+.center[![:scale 400px](imgs/rest-levels-meme.jpg)]
 
+---
+>
+
+>
+
+>
+
+>
+.center[# El Fin]
+<
+
+<
+
+<
+
+<
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
     </script>
