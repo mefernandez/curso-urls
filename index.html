@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Curso URLs</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+        text-align: center;
+      }
+      blockquote {
+        color: #61737d;
+        border-left: .25em solid #dfe2e5;
+        padding: 0 1em;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      img[alt=indice] { width: 400px;}
+      .mono {
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Curso URLs
+
+---
+
+# Índice
+
+![indice](imgs/index.png)
+
+---
+
+# Anular
+
+- Qué es una URL
+- Qué es una URI
+- @PathVarible vs @RequestParam vs @RequestBody
+- REST y Richardson Maturity Model
+- REST y Angular
+
+---
+
+# Qué es una URL
+
+- URL: Uniform Resource Locator
+
+https://developer.mozilla.org/en-US/docs/Learn/Common_questions/What_is_a_URL
+
+> "A URL is nothing more than the address of a given unique resource on the Web. 
+> In theory, each valid URL points to a unique resource"
+
+![:scale 800px](imgs/mdn-url-all.png)
+
+---
+
+## Path to resource
+
+![:scale 800px](imgs/mdn-url-path-x2.png)
+
+## Parameters
+
+![:scale 800px](imgs/mdn-url-parameters-x2.png)
+
+## Anchor
+
+![:scale 800px](imgs/mdn-url-anchor-x2.png)
+---
+
+# URLs Semáticas
+
+| Original URL | Clean URL |
+|--------------|-----------|
+|http://example.com/about.html|http://example.com/about|
+|http://example.com/user.php?id=1|http://example.com/user/1|
+|http://example.com/index.php?page=name|http://example.com/name|
+|http://example.com/kb/index.php?cat=1&id=23|http://example.com/kb/1/23|
+|http://en.wikipedia.org/w/index.php?title=Clean_URL|http://en.wikipedia.org/wiki/Clean_URL|
+
+---
+
+# Qué es una URI
+
+https://en.wikipedia.org/wiki/Uniform_Resource_Identifier
+
+> A Uniform Resource Identifier (URI) is a unique sequence of characters 
+> that identifies a logical or physical resource
+
+Una **URL** es una **URI** que además indica cómo obtener el _Resource_.
+![:scale 400px](imgs/ejemplos-de-urls.png)
+
+En contraste, un **URN** no indica cómo obtener el _Resource_.
+![:scale 400px](imgs/ejemplo-de-urn.png)
+
+---
+
+# URLs & Resources
+
+## Collections
+
+https://localhost:8080/colegiados
+
+## Single Resource
+
+https://localhost:8080/colegiados/1103
+
+---
+
+# Criterios de Diseño de URLs
+
+## 1. Uniformidad
+
+https://localhost:8080/colegiados
+
+https://localhost:8080/colegiados?page=1
+
+https://localhost:8080/colegiados/crear
+
+https://localhost:8080/colegiados/1103/editar
+
+https://localhost:8080/colegiados/1103/guardar
+
+https://localhost:8080/colegiados/1103/borrar
+
+---
+
+# @PathVariable
+
+```java
+@GetMapping("/repos/{owner}/{repo}/issues/{issue_number}")
+public ... getIssue(
+  @PathVariable("owner") String owner,
+  @PathVariable("repo") String repo,
+  @PathVariable("issue_number") Long issueNumber,
+) {
+  ...
+}
+```
+
+```
+GET /repos/{owner}/{repo}/issues/{issue_number}
+```
+
+---
+
+# @RequestParam
+
+```java
+@GetMapping(path = "/documentos/firmar", params = "id")
+public ... firmar(
+  @RequestParam("id") List<Long> idList,
+) {
+  ...
+}
+```
+
+```
+GET /colegiados/firmar?id=1,2,3
+```
+
+---
+
+# @RequestBody
+
+## POST
+```java
+@PostMapping("/colegiados/crear")
+public ... guardar(
+  @RequestBody Colegiado colegiado,
+) {
+  ...
+}
+```
+
+```
+POST /colegiados/crear
+```
+```json
+{
+  "nombre": "",
+  "apellidos": ""
+}
+```
+
+---
+# @RequestBody && @PathVariable
+
+## PUT, PATCH
+```java
+@PostMapping("/colegiados/{numero_colegiado}")
+public ... guardar(
+  @PathVariable("numero_colegiado") String numeroColegiado,
+  @RequestBody Colegiado colegiado,
+) {
+  ...
+}
+```
+```
+PUT/PATCH /colegiados/1103
+```
+```json
+{
+  "nombre": "",
+  "apellidos": ""
+}
+```
+---
+# @PathVariable
+
+## DELETE
+```java
+@DeleteMapping("/colegiados/{numero_colegiado}")
+public ... borrar(
+  @PathVariable("numero_colegiado") String numeroColegiado,
+) {
+  ...
+}
+```
+```
+DELETE /colegiados/1103
+```
+
+
+---
+# Problemas: @PathVariable
+
+## Subconjuntos o Subpaths
+
+Dada la URL:
+```
+GET /colegiados/fernandez/mariano
+```
+
+Entonces:
+
+1. Si **`/colegiados`** me devuelve la colección de Colegiados
+
+2. ¿**`/colegiados/fernandez`** me devuelve la colección de Colegiados de apellido "Fernández"?
+
+3. ¿**`/colegiados/fernandez/mariano`** me devuelve la colección de Colegiados de apellido "Fernández" y nombre "Mariano"?
+
+4. No es explícito que **`/fernandez`** sea el apellido ni que **`/mariano`** sea el nombre.
+
+5. También aplica a **`/colegiados/1103`**; no es explícito que sea el número de colegiado.
+---
+# Solución: @PathVariable
+
+## Subconjuntos o Subpaths
+
+Dada la URL:
+```
+GET /colegiados
+```
+
+Entonces:
+
+1. **`/colegiados?apellidos=fernandez&nombre=mariano`** me devuelve la colección de Colegiados
+**filtrada por** apellidos y nombre.
+
+---
+# Más Problemas: @PathVariable
+
+1. Solemos interpretar un `path` como una jerarquía (ej. directorio en filsystem)
+
+2. Si quisiéramos describir un Resource de tipo Dirección, ¿qué problemas tendría el siguiente _template_ de URL?
+
+```
+/direcciones/{pais}/{provincia}/{poblacion}
+                      /{tipo_via}/{calle}/{numero}/{escalera}/{piso}/{puerta}
+```
+
+3. Imaginemos un caso concreto:
+
+```
+/direcciones/españa/valencia/torrente/av/cid/45/1/3/12
+``` 
+
+---
+# Más ejemplos de **/paths**
+
+## El caso de las fechas
+
+```
+/facturas/{anyo}/{mes}/{dia}
+```
+
+Tendría sentido:
+
+1. Colección de facturas de 2021: **`/facturas/2021`**
+2. Colección de facturas de Mayo de 2021: **`/facturas/2021/05`**
+2. Colección de facturas del 31 de Mayo de 2021: **`/facturas/2021/05/31`**
+
+
+---
+
+# URLs y REST
+
+Stefan Tilkov @ InfoQ:
+
+https://www.infoq.com/presentations/rest-misconceptions/
+
+![:scale 600px](imgs/infoq-stefan-tilkov-rest-and-urls.png)
+
+![:scale 400px](imgs/infoq-stefan-tilkov-no-restful-uris.png)
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      remark.macros.scale = function (percentage) {
+        var url = this;
+        return '<img src="' + url + '" style="width: ' + percentage + '" />';
+      };
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
